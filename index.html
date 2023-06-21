@@ -1,0 +1,119 @@
+in JavaScript
+
+You:
+
+<html>
+  <head>
+    <title>Snake Game</title>
+  </head>
+  <body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script>
+      let canvas;
+      let ctx;
+      let snake;
+      let food;
+      let score = 0;
+
+      function init() {
+        canvas = document.getElementById('gameCanvas');
+        ctx = canvas.getContext('2d');
+        snake = new Snake();
+        food = new Food();
+        setFoodPosition();
+        setInterval(gameLoop, 1000/10);
+      }
+
+      function setFoodPosition() {
+        const x = Math.floor(Math.random() * canvas.width);
+        const y = Math.floor(Math.random() * canvas.height);
+        food.setPosition(x, y);
+      }
+
+      function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        snake.move();
+        if (snake.collidesWith(food)) {
+          score++;
+          setFoodPosition();
+          snake.grow();
+        }
+        snake.draw();
+        food.draw();
+        ctx.fillText(`Score: ${score}`, 10, 20);
+      }
+
+      class Snake {
+        constructor() {
+          this.body = [{x: 10, y: 10}];
+          this.direction = {x: 1, y: 0};
+        }
+
+        move() {
+          const head = this.getHead();
+          const nextPosition = {
+            x: head.x + this.direction.x,
+            y: head.y + this.direction.y
+          };
+          this.body.pop();
+          this.body.unshift(nextPosition);
+        }
+
+        grow() {
+          const head = this.getHead();
+          const newBodyPart = {
+            x: head.x + this.direction.x,
+            y: head.y + this.direction.y
+          };
+          this.body.unshift(newBodyPart);
+        }
+
+        collidesWith(food) {
+          return this.getHead().x === food.x && this.getHead().y === food.y;
+        }
+
+        draw() {
+          ctx.fillStyle = 'green';
+          this.body.forEach(bodyPart => {
+            ctx.fillRect(bodyPart.x, bodyPart.y, 10, 10);
+          });
+        }
+
+        getHead() {
+          return this.body[0];
+        }
+      }
+
+      class Food {
+        setPosition(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+
+        draw() {
+          ctx.fillStyle = 'red';
+          ctx.fillRect(this.x, this.y, 10, 10);
+        }
+      }
+
+      document.addEventListener('keydown', e => {
+        switch (e.key) {
+          case 'ArrowUp':
+            snake.direction = {x: 0, y: -1};
+            break;
+          case 'ArrowDown':
+            snake.direction = {x: 0, y: 1};
+            break;
+          case 'ArrowLeft':
+            snake.direction = {x: -1, y: 0};
+            break;
+          case 'ArrowRight':
+            snake.direction = {x: 1, y: 0};
+            break;
+        }
+      });
+
+      init();
+    </script>
+  </body>
+</html>
